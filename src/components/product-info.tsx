@@ -7,8 +7,19 @@ import { StarIcon } from "@/components/icons";
 import { ColorSwatches } from "@/components/color-swatches";
 import { SizeSelector } from "@/components/size-selector";
 import { WishlistButton } from "@/components/wishlist-button";
+import { SizeCalculator } from "@/components/size-calculator";
 import { getSellerById } from "@/data/sellers";
 import { useProductPage } from "@/components/product-page-context";
+import type { SizeChartCategory } from "@/data/sizeCharts";
+
+function getSizeChartCategory(product: Product): SizeChartCategory | null {
+  if (product.productCategory === "shoes") return "sneakers";
+  if (product.productCategory === "apparel") {
+    const bottomTypes = ["pant"];
+    return bottomTypes.includes(product.type) ? "clothing_bottom" : "clothing_top";
+  }
+  return null;
+}
 
 interface ProductInfoProps {
   product: Product;
@@ -57,6 +68,7 @@ function getEstimatedDelivery(): string {
 
 export function ProductInfo({ product }: ProductInfoProps) {
   const { selectedColor, selectedSize, setSelectedColor, setSelectedSize, handleAddToCart } = useProductPage();
+  const sizeChartCategory = getSizeChartCategory(product);
 
   const stock = useMemo(() => getStockInfo(product.id), [product.id]);
   const seller = getSellerById(product.sellerId);
@@ -155,6 +167,15 @@ export function ProductInfo({ product }: ProductInfoProps) {
         selectedSize={selectedSize}
         onSelect={setSelectedSize}
       />
+
+      {/* Size calculator — inline accordion, shown only when chart data exists */}
+      {sizeChartCategory && (
+        <SizeCalculator
+          category={sizeChartCategory}
+          availableSizes={product.sizes}
+          onSizeSelect={setSelectedSize}
+        />
+      )}
 
       {/* Add to cart — prominent dark button */}
       <button
