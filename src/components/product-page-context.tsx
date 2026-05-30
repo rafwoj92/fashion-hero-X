@@ -5,7 +5,7 @@ import type { Product, ProductColor } from "@/types";
 import { useCart } from "./cart-provider";
 
 interface ProductPageContextValue {
-  selectedColor: ProductColor | null;
+  selectedColor: ProductColor;
   selectedSize: number | null;
   setSelectedColor: (c: ProductColor) => void;
   setSelectedSize: (s: number | null) => void;
@@ -27,7 +27,7 @@ export function ProductPageProvider({
 
   const handleAddToCart = useCallback(() => {
     if (!selectedSize) return;
-    addItem(product, selectedColor!, selectedSize);
+    addItem(product, selectedColor, selectedSize);
   }, [product, selectedColor, selectedSize, addItem]);
 
   return (
