@@ -5,6 +5,8 @@ import { ImageGallery } from "@/components/image-gallery";
 import { ProductInfo } from "@/components/product-info";
 import { ProductDetailsAccordion } from "@/components/product-details-accordion";
 import { RelatedProducts } from "@/components/related-products";
+import { ProductPageProvider } from "@/components/product-page-context";
+import { StickyCartBar } from "@/components/sticky-cart-bar";
 import { RecentlyViewedSection } from "./recently-viewed-section";
 
 interface PageProps {
@@ -40,28 +42,31 @@ export default async function ProductPage({ params }: PageProps) {
   const related = getRelatedProducts(product);
 
   return (
-    <main className="max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-10">
-      {/* Two-column layout: image 60% left, info 40% right */}
-      <div className="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-8 md:gap-12">
-        <ImageGallery
-          images={product.images}
-          productName={product.name}
-          colorName={product.colors[0]?.name}
-          colorHex={product.colors[0]?.hex}
-        />
-        <ProductInfo product={product} />
-      </div>
+    <ProductPageProvider product={product}>
+      <main className="max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-10">
+        {/* Two-column layout: image 60% left, info 40% right */}
+        <div className="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-8 md:gap-12">
+          <ImageGallery
+            images={product.images}
+            productName={product.name}
+            colorName={product.colors[0]?.name}
+            colorHex={product.colors[0]?.hex}
+          />
+          <ProductInfo product={product} />
+        </div>
 
-      {/* Accordion details */}
-      <div className="mt-12 max-w-2xl">
-        <ProductDetailsAccordion product={product} />
-      </div>
+        {/* Accordion details */}
+        <div className="mt-12 max-w-2xl">
+          <ProductDetailsAccordion product={product} />
+        </div>
 
-      {/* Related products */}
-      <RelatedProducts products={related} />
+        {/* Related products */}
+        <RelatedProducts products={related} />
 
-      {/* Recently viewed */}
-      <RecentlyViewedSection productId={product.id} />
-    </main>
+        {/* Recently viewed */}
+        <RecentlyViewedSection productId={product.id} />
+      </main>
+      <StickyCartBar product={product} />
+    </ProductPageProvider>
   );
 }

@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
-import type { Product, ProductColor } from "@/types";
+import type { Product } from "@/types";
 import { StarIcon } from "@/components/icons";
 import { ColorSwatches } from "@/components/color-swatches";
 import { SizeSelector } from "@/components/size-selector";
-import { useCart } from "@/components/cart-provider";
 import { WishlistButton } from "@/components/wishlist-button";
 import { getSellerById } from "@/data/sellers";
+import { useProductPage } from "@/components/product-page-context";
 
 interface ProductInfoProps {
   product: Product;
@@ -56,9 +56,7 @@ function getEstimatedDelivery(): string {
 }
 
 export function ProductInfo({ product }: ProductInfoProps) {
-  const [selectedColor, setSelectedColor] = useState<ProductColor>(product.colors[0]);
-  const [selectedSize, setSelectedSize] = useState<number | null>(null);
-  const { addItem } = useCart();
+  const { selectedColor, selectedSize, setSelectedColor, setSelectedSize, handleAddToCart } = useProductPage();
 
   const stock = useMemo(() => getStockInfo(product.id), [product.id]);
   const seller = getSellerById(product.sellerId);
@@ -75,11 +73,6 @@ export function ProductInfo({ product }: ProductInfoProps) {
     : product.category === "women"
     ? "womens"
     : "mens";
-
-  function handleAddToCart() {
-    if (!selectedSize) return;
-    addItem(product, selectedColor, selectedSize);
-  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -165,6 +158,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
       {/* Add to cart — prominent dark button */}
       <button
+        id="main-add-to-cart"
         onClick={handleAddToCart}
         disabled={!selectedSize}
         className="w-full py-4 bg-charcoal text-white text-[12px] font-medium uppercase tracking-[0.6px] rounded-full hover:bg-charcoal-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
