@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/types";
 import { WishlistButton } from "./wishlist-button";
@@ -11,6 +12,14 @@ import { getSellerById } from "@/data/sellers";
 interface ProductCardProps {
   product: Product;
   className?: string;
+  stock?: number;
+  maxStock?: number;
+}
+
+function stockColor(ratio: number): string {
+  if (ratio > 0.5) return "#22c55e";
+  if (ratio > 0.2) return "#f97316";
+  return "#ef4444";
 }
 
 /* Each product gets a unique gradient based on its first color hex */
@@ -22,9 +31,16 @@ function hasRealImage(src: string): boolean {
   return src.startsWith("/images/");
 }
 
-export function ProductCard({ product, className }: ProductCardProps) {
+export function ProductCard({ product, className, stock, maxStock = 100 }: ProductCardProps) {
   const firstColor = product.colors[0];
   const { openQuickView } = useQuickView();
+  const [viewers, setViewers] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (stock !== undefined) {
+      setViewers(Math.floor(Math.random() * 22) + 3);
+    }
+  }, [stock]);
   const seller = getSellerById(product.sellerId);
   const badgeLabel = product.badge === "new"
     ? "NEW"
@@ -48,7 +64,12 @@ export function ProductCard({ product, className }: ProductCardProps) {
             className="relative aspect-square overflow-hidden mb-3"
             style={{ background: productGradient(firstColor.hex) }}
           >
-            {badgeLabel && (
+            {stock !== undefined && stock <= 5 && (
+              <span className="absolute top-3 left-3 text-[10px] font-medium uppercase tracking-wider bg-red-600 text-white px-2 py-1 z-10">
+                Ostatnie {stock} szt.
+              </span>
+            )}
+            {!(stock !== undefined && stock <= 5) && badgeLabel && (
               <span className="absolute top-3 left-3 text-[10px] font-medium uppercase tracking-wider bg-white/90 px-2 py-1 z-10">
                 {badgeLabel}
               </span>
@@ -148,6 +169,25 @@ export function ProductCard({ product, className }: ProductCardProps) {
           </span>
         )}
       </div>
+
+      {stock !== undefined && (
+        <>
+          <div className="mt-1.5 h-[3px] w-full bg-black/10 rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full"
+              style={{
+                width: `${Math.min(100, (stock / maxStock) * 100)}%`,
+                backgroundColor: stockColor(stock / maxStock),
+              }}
+            />
+          </div>
+          {viewers !== null && (
+            <p className="mt-1 text-[11px] text-warm-gray">
+              👁 {viewers} osób ogląda teraz
+            </p>
+          )}
+        </>
+      )}
     </div>
   );
 }
