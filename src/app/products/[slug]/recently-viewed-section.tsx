@@ -1,12 +1,28 @@
 "use client";
 
 import { useEffect } from "react";
-import { RecentlyViewed, trackRecentlyViewed } from "@/components/recently-viewed";
+import type { Product } from "@/types";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import { RecentlyViewed } from "@/components/recently-viewed";
 
-export function RecentlyViewedSection({ productId }: { productId: string }) {
+interface Props {
+  product: Product;
+}
+
+export function RecentlyViewedSection({ product }: Props) {
+  const { addItem } = useRecentlyViewed();
+
   useEffect(() => {
-    trackRecentlyViewed(productId);
-  }, [productId]);
+    const firstColor = product.colors[0];
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: firstColor?.image ?? "",
+      slug: product.slug,
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id]);
 
-  return <RecentlyViewed currentProductId={productId} />;
+  return <RecentlyViewed currentProductId={product.id} />;
 }
